@@ -5,6 +5,7 @@
 #include <vector>
 #include <fstream>
 #include <map>
+#include <limits>
 
 // have to remove tab from activity when inputting timetable from file
 
@@ -23,22 +24,28 @@ std::vector<std::tuple<int, int, std::string>> initialise_timetable() {
 
 std::vector<std::tuple<int, int, std::string>> input_into_timetable(std::vector<std::tuple<int, int, std::string>> timetable) {
     std::tuple<int, int, std::string> temp;
-    int hour, minute, blocks;
+    int hour, minute, blocks = 0;
     std::string activity;
     while(true) {
-        std::cout << "Type with the format or exit: hour (00 to 24) minute (00 to 45 in intervals of 15) activity (any string \" x y z\") \n\t--";
-        std::cin.ignore();
+        std::cout << "Type with the format or exit: \n\t--hour (00 to 24) \n\t--minute (00 to 45 in intervals of 15) \n\t--activity (any string \" x y z\") \n\t--e.g. 05:06 \"Something\"\n\t--";
         std::getline(std::cin, activity);
         if(activity == "exit") {
             break;
         }
-        std::cout << "Enter number of blocks to take up\n\t--";
-        std::cin >> blocks;
+        while (blocks <= 0) {
+            std::cout << "Enter number of blocks to take up\n\t--";
+            std::cin >> blocks;
+            std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+            if (blocks <= 0) {
+                std::cout << "Amount of Blocks must be greater than 0\n";
+            }
+        }
         hour = (activity[0]-'0')*10 + (activity[1]-'0');
         activity.erase(0, 3);
         minute = (activity[0]-'0')*10 + (activity[1]-'0');
         activity.erase(0, 3);
         if(hour > 23 || hour < 0 || !(minute % 15 == 0 && minute >=0 && minute <=45)) {
+            std::cout << "hour: " << hour << " minute: " << minute << " activity: " << activity;
             std::cout << "\nPlease use the correct format\n\n";
             continue;
         }
@@ -89,6 +96,7 @@ void output_to_file(std::vector<std::tuple<int, int, std::string>> timetable){
 
     std::cout << "Enter filename with file extension: ";
     std::cin >> filename;
+    std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
 
     // instantiating ofstream and opening a file
     std::ofstream *file = new std::ofstream();
@@ -128,6 +136,7 @@ std::vector<std::tuple<int, int, std::string>> input_from_file() {
 
     std::cout << "Enter filename with file extension: ";
     std::cin >> filename;
+    std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
 
     std::ifstream *file = new std::ifstream();
     file -> open(filename, std::ios::in);
@@ -154,7 +163,6 @@ void check_timeslot(std::vector<std::tuple<int, int, std::string>> timetable) {
     std::string activity, c;
     int hour, minute, a, b = 0;
 
-    std::cin.ignore();
     while(true) {
         std::cout << "Type with the format or exit: hour (00 to 24) minute (00 to 45 in intervals of 15) activity (any string \" x y z\") \n\t--";
         std::getline(std::cin, activity);
@@ -204,7 +212,6 @@ void calculate_activity_durations(std::vector<std::tuple<int, int, std::string>>
     }
 
     std::cout << "Enter activity to check duration of or press ~~ to exit: \n\t--";
-    std::cin.ignore();
     while(std::getline(std::cin, usr_in) && usr_in != "~~") {
         std::cout << "\n" << usr_in << " has duration: " << activity_duration[usr_in] << " minutes, or " << (activity_duration[usr_in]/60) << " hours\n";
         std::cout << "Enter activity to check duration of or press ~~ to exit: \n\t--";
