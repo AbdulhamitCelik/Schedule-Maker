@@ -1,11 +1,13 @@
 #include <iostream>
 #include <set>
+#include <sstream>
 #include <string>
 #include <tuple>
 #include <vector>
 #include <fstream>
 #include <map>
 #include <limits>
+#include <sstream>
 
 // have to remove tab from activity when inputting timetable from file
 
@@ -100,7 +102,7 @@ void output_to_file(std::vector<std::tuple<int, int, std::string>> timetable){
     std::string activity = "";
 
 
-    std::cout << "Enter filename with file extension: ";
+    std::cout << "Enter filename with file extension .csv with no spaces: ";
     std::cin >> filename;
     std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
 
@@ -109,23 +111,24 @@ void output_to_file(std::vector<std::tuple<int, int, std::string>> timetable){
     file -> open(filename, std::ios::out); //std::ios::out enables write mode and overwrites everything in the file if it exists or creates a new one
 
     // writing to file
-
     for (int i = 0; i < timetable.size(); i++) {
         if(counter == 0){
-            (*file) << "TIME \tACTIVITY\n\n";
+            (*file) << "TIME,ACTIVITY" << std::endl;
             counter++;
             i--;
             continue;
         }
+
+        // format per line is: hour,min,activity,
         std::tie(hour, minute, activity) = timetable[i];
         if (minute == 0 && hour < 10) {
-            (*file) << "0" << std::to_string(hour) + ":" + std::to_string(minute) + "0\t" + activity << std::endl;
+            (*file) << "0" << std::to_string(hour) + "," + std::to_string(minute) + "0," + activity << std::endl;
         } else if (minute == 0 && hour >= 10){
-            (*file) << std::to_string(hour) + ":" + std::to_string(minute) + "0\t" + activity << std::endl;
+            (*file) << std::to_string(hour) + "," + std::to_string(minute) + "0," + activity << std::endl;
         } else if (hour < 10) {
-            (*file) << "0" << std::to_string(hour) + ":" + std::to_string(minute) + "\t" + activity << std::endl;
+            (*file) << "0" << std::to_string(hour) + "," + std::to_string(minute) + "," + activity << std::endl;
         } else {
-            (*file) << std::to_string(hour) + ":" + std::to_string(minute) + "\t" + activity << std::endl;
+            (*file) << std::to_string(hour) + "," + std::to_string(minute) + "," + activity << std::endl;
         }
     }
 
@@ -137,7 +140,9 @@ std::vector<std::tuple<int, int, std::string>> input_from_file() {
     std::tuple<int, int, std::string> temp;
     std::string filename;
     std::string data;
-    int hour, minute, counter = 0;
+    std::string temp_str;
+    int hour, minute = 0;
+    int counter = 0;
     std::string activity = "";
 
     std::cout << "Enter filename with file extension: ";
@@ -146,17 +151,18 @@ std::vector<std::tuple<int, int, std::string>> input_from_file() {
 
     std::ifstream *file = new std::ifstream();
     file -> open(filename, std::ios::in);
-
     while (std::getline(*file, data)) {
-        if(counter < 2){
-            counter++;
-            continue;
-        }
-        hour = (data[0]-'0')*10 + (data[1]-'0');
-        data.erase(0, 3);
-        minute = (data[0]-'0')*10 + (data[1]-'0');
-        data.erase(0, 2);
-        temp = std::tuple(hour, minute, data);
+
+        if (counter++ < 1) continue;
+
+        std::stringstream stream(data);
+        std::getline(stream, temp_str, ',');
+        hour = std::stoi(temp_str);
+        std::getline(stream, temp_str, ',');
+        minute = std::stoi(temp_str);
+        std::getline(stream, temp_str, ',');
+
+        temp = std::tuple(hour, minute, temp_str);
         timetable.push_back(temp);
     }
 
