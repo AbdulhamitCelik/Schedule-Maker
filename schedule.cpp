@@ -24,24 +24,30 @@ std::vector<std::tuple<int, int, std::string>> initialise_timetable() {
 
 std::vector<std::tuple<int, int, std::string>> input_into_timetable(std::vector<std::tuple<int, int, std::string>> timetable) {
     std::tuple<int, int, std::string> temp;
-    int hour, minute, blocks = 0;
-    std::string activity;
+
     while(true) {
-        std::cout << "Type with the format or exit: \n\t--hour (00 to 24) \n\t--minute (00 to 45 in intervals of 15) \n\t--activity (any string \" x y z\") \n\t--e.g. 05:06 \"Something\"\n\t--";
+        int hour, minute, blocks = 0;
+        std::string activity = "";
+        std::cout << "Type with the format or type 'exit': \n- hour (00 to 24) \n- minute (00 to 45 in intervals of 15) \n- activity (any string \" x y z\") \n- e.g. 05:06 Something\n\t--";
         std::getline(std::cin, activity);
         if(activity == "exit") {
             break;
         }
+        std::cout << "1\n";
         while (blocks <= 0) {
             std::cout << "Enter number of blocks to take up\n\t--";
             std::cin >> blocks;
+            std::cout << "2\n";
             std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+            std::cout << "3\n";
             if (blocks <= 0) {
                 std::cout << "Amount of Blocks must be greater than 0\n";
             }
         }
+        std::cout << "4\n";
         hour = (activity[0]-'0')*10 + (activity[1]-'0');
         activity.erase(0, 3);
+        std::cout << "5\n";
         minute = (activity[0]-'0')*10 + (activity[1]-'0');
         activity.erase(0, 3);
         if(hour > 23 || hour < 0 || !(minute % 15 == 0 && minute >=0 && minute <=45)) {
