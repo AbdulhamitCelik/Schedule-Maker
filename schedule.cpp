@@ -264,95 +264,75 @@ void calculate_activity_durations(std::vector<std::tuple<int, int, std::string>>
 
 }
 
-std::vector<std::tuple<int, int, std::string>> call_function(int page, int subpage, std::vector<std::tuple<int, int, std::string>> timetable) {
+std::vector<std::tuple<int, int, std::string>> call_function(int page, std::vector<std::tuple<int, int, std::string>> timetable) {
+
     switch (page) {
-        case 0:
-            // Main Page
-            switch (subpage) {
-                case 1:
-                    timetable = initialise_timetable();
-                    break;
-                case 2:
-                    print_timetable(timetable);
-                    break;
-                case 3:
-                    timetable = input_from_file();
-                    break;
-                case 4:
-                    timetable = input_into_timetable(timetable);
-                    break;
-                case 5:
-                    output_to_file(timetable);
-                    break;
-                case 6:
-                    check_timeslot(timetable);
-                    break;
-                case 7:
-                    calculate_activity_durations(timetable);
-                default:
-                    break;
-            }
+        case 1:
+            timetable = initialise_timetable();
             break;
-        /*case 1:
-            switch (subpage) {
-                case 0:
-                    break;
-                case 1:
-                    break;
-            }
+        case 2:
+            print_timetable(timetable);
             break;
+        case 3:
+            timetable = input_from_file();
+            break;
+        case 4:
+            timetable = input_into_timetable(timetable);
+            break;
+        case 5:
+            output_to_file(timetable);
+            break;
+        case 6:
+            check_timeslot(timetable);
+            break;
+        case 7:
+            calculate_activity_durations(timetable);
         default:
-            break;*/
+            break;
     }
 
     return timetable;
 }
 
-void populate_page(int page) {
-    switch (page) {
-        case 0:
-            std::cout << "1. Initialise a new Timetable\n";
-            std::cout << "2. Print a Timetable onto the Screen\n";
-            std::cout << "3. Get a Pre-Existing Timetable from a File\n";
-            std::cout << "4. Input Activities into Timetable\n";
-            std::cout << "5. Output Current Timetable to a File\n";
-            std::cout << "6. Check Activity in a Specific Time Slot in Current Timetable\n";
-            std::cout << "7. Check Specific Activity Total Duration in Current Timetable\n";
-            std::cout << "8. exit\n";
-            break;
-        case 1:
-            break;
-        default:
-            break;
-    }
+void populate_page() {
+
+    std::cout << "1. Initialise a new Timetable\n";
+    std::cout << "2. Print a Timetable onto the Screen\n";
+    std::cout << "3. Get a Pre-Existing Timetable from a File\n";
+    std::cout << "4. Input Activities into Timetable\n";
+    std::cout << "5. Output Current Timetable to a File\n";
+    std::cout << "6. Check Activity in a Specific Time Slot in Current Timetable\n";
+    std::cout << "7. Check Specific Activity Total Duration in Current Timetable\n";
+    std::cout << "8. exit\n";
+
     std::cout << "-- ";
 }
 
 void user_interface(std::vector<std::tuple<int, int, std::string>> timetable) {
-    int page, subpage = 0;
+    int page = 0;
     std::string input;
-    std::set<int> subpages = {1, 2, 3, 4, 5, 6, 7};
+    std::set<int> pages = {1, 2, 3, 4, 5, 6, 7};
 
     while (true) {
-        populate_page(0);
+        populate_page();
         try {
             std::getline(std::cin, input);
-            subpage = std::stoi(input);
+            page = std::stoi(input);
         }
         catch(...){
             std::cout << "\nEnter a single number in the options. \n\n";
             continue;
         }
 
-        if(!subpages.contains(subpage) && subpage == 8) {
+        if(!pages.contains(page) && page == 8) {
             std::cout << "\nScheduler Builder usage complete. \n\n";
             break;
         }
-        if(!subpages.contains(subpage)) {
+        if(!pages.contains(page)) {
             std::cout << "\nEnter a single number in the options. \n\n";
             continue;
         }
-        timetable = call_function(0, subpage, timetable);
+        timetable = call_function(page, timetable);
     }
 }
 
