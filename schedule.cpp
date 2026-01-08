@@ -10,21 +10,28 @@
 
 int block_size = 0;
 
-std::vector<std::tuple<int, int, std::string>> initialise_timetable() {
-    std::vector<std::tuple<int, int, std::string>> timetable;
+std::vector<std::tuple<int, int, std::string>> initialise_timetable(std::vector<std::tuple<int, int, std::string>> timetable) {
     std::tuple<int, int, std::string> temp;
+    char test;
+
+    std::cout << "Are you sure you want to (re)initialise timetable? y to proceed.\n\t--";
+    std::cin >> test;
+    std::cin.clear();
+    std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+    if (test != 'y') {
+        std::cout << "\nNot proceeding as didn't receive y.\n\n";
+        return timetable;
+    }
+
 
     while (true) {
-        try {
-            while (block_size < 1 || block_size > 60) {
-                std::cout << "Enter size of a block in minutes (1 to 60)\n\t--";
-                std::cin >> block_size;
-                std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
-            }
-        }
-        catch (...) {
-            std::cout << "Incorrect kind of input provided";
-            continue;
+        timetable.clear();
+        while (block_size < 1 || block_size > 60) {
+            block_size = 0;
+            std::cout << "Enter integer size of a block in minutes (1 to 60)\n\t--";
+            std::cin >> block_size;
+            std::cin.clear();
+            std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
         }
 
         for (int i = 0; i < (24*60); i += block_size) {
@@ -34,8 +41,9 @@ std::vector<std::tuple<int, int, std::string>> initialise_timetable() {
         break;
     }
 
-    std::cout << "\nTimetable has been (re)initialised successfully. \n\n";
     block_size = 0;
+    std::cout << "\nTimetable has been (re)initialised successfully. \n\n";
+
     return timetable;
 }
 
@@ -60,35 +68,30 @@ std::vector<std::tuple<int, int, std::string>> input_into_timetable(std::vector<
             activity.erase(0, 3);
         }
         catch (...) {
-            std::cout << "Incorrect kind of input provided";
+            std::cout << "\nIncorrect kind of input provided\n\n";
             continue;
         }
 
-        if(hour > 23 || hour < 0 || !(minute % 15 == 0 && minute >=0 && minute <=45)) {
+        if(hour > 23 || hour < 0 || !(minute % block_size == 0 && minute >=0 && minute < 60)) {
             std::cout << "\nPlease use the correct format\n\n";
             continue;
         }
 
-        try {
-            while (blocks <= 0 || blocks > (60/block_size)*24) {
-                std::cout << "Enter number of blocks to take up (1 block is" << block_size << " minutes long)\n\t--";
-                std::cin >> blocks;
-                std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
-                if (blocks <= 0) {
-                    std::cout << "Amount of Blocks must be greater than 0\n";
-                }
+        while (blocks <= 0 || blocks > (60/block_size)*24) {
+            std::cout << "Enter number of blocks to take up (1 block is " << block_size << " minutes long)\n\t--";
+            std::cin >> blocks;
+            std::cin.clear();
+            std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+            if (blocks <= 0 || blocks > (60/block_size)*24) {
+                std::cout << "Amount of Blocks must be > 0 and <= " << ((60/block_size)*24) <<" \n";
             }
-        }
-        catch (...) {
-            std::cout << "Incorrect kind of input provided";
-            continue;
         }
 
         for (int i = 0; i < blocks; i++){
-            int newhour = hour + int((minute + 15*i)/60);
-            int newminute = (minute + 15*i)%60;
+            int newhour = hour + int((minute + block_size*i)/60);
+            int newminute = (minute + block_size*i)%60;
             temp = std::tuple(newhour, newminute, activity);
-            timetable[(newhour*60 + newminute)/15] = temp;
+            timetable[(newhour*60 + newminute)/block_size] = temp;
         }
         std::cout << "\nActivity has been inputted into Timetable. \n\n";
     }
@@ -133,7 +136,7 @@ void output_to_file(std::vector<std::tuple<int, int, std::string>> timetable){
     std::string activity = "";
 
 
-    std::cout << "Enter filename with file extension .csv with no spaces: ";
+    std::cout << "\nEnter filename with file extension .csv with no spaces: ";
     std::cin >> filename;
     std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
 
@@ -176,7 +179,7 @@ std::vector<std::tuple<int, int, std::string>> input_from_file() {
     int counter = 0;
     std::string activity = "";
 
-    std::cout << "Enter filename with file extension: ";
+    std::cout << "\nEnter filename with file extension: ";
     std::cin >> filename;
     std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
 
@@ -261,14 +264,13 @@ void calculate_activity_durations(std::vector<std::tuple<int, int, std::string>>
     }
 
     std::cout << "\nActivity durations have been checked successfully. \n\n";
-
 }
 
 std::vector<std::tuple<int, int, std::string>> call_function(int page, std::vector<std::tuple<int, int, std::string>> timetable) {
 
     switch (page) {
         case 1:
-            timetable = initialise_timetable();
+            timetable = initialise_timetable(timetable);
             break;
         case 2:
             print_timetable(timetable);
